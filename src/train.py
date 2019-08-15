@@ -7,8 +7,9 @@ import argparse
 import logging
 import os
 
+import joblib
 import yaml
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import GridSearchCV, train_test_split
 
 from src.load_data import load_combined, load_red, load_white, make_binary_target
 from src.pipeline import FEATURES, build_pipeline
@@ -49,10 +50,20 @@ def main(config_path):
     log.info("train=%d test=%d positives=%d", len(X_train), len(X_test), int(y.sum()))
 
     pipe = build_pipeline(random_state=cfg["model"]["random_state"])
-    pipe.fit(X_train, y_train)
+    grid = GridSearchCV(
+        pipe,
+        param_grid=cfg["param_grid"],
+        cv=cfg["cv"]["folds"],
+        scoring=cfg["cv"]["scoring"],
+        n_jobs=cfg["cv"]["n_jobs"],
+    )
+    grid.fit(X_train, y_train)
 
-    score = pipe.score(X_test, y_test)
-    log.info("test accuracy: %.4f", score)
+    log.info("best CV %s: %.4f", cfg["cv"]["scoring"], grid.best_score_)
+    log.info("best params: %s", grid.best_params_)
+
+    test_score = grid.best_estimator_.score(X_test, y_test)
+    log.info("test accuracy: %.4f", test_score)
 
 
 if __name__ == "__main__":
