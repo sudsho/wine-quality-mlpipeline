@@ -9,6 +9,7 @@ import os
 
 import joblib
 import yaml
+from sklearn.metrics import classification_report
 from sklearn.model_selection import GridSearchCV, train_test_split
 
 from src.load_data import load_combined, load_red, load_white, make_binary_target
@@ -62,8 +63,17 @@ def main(config_path):
     log.info("best CV %s: %.4f", cfg["cv"]["scoring"], grid.best_score_)
     log.info("best params: %s", grid.best_params_)
 
-    test_score = grid.best_estimator_.score(X_test, y_test)
+    best = grid.best_estimator_
+    test_score = best.score(X_test, y_test)
     log.info("test accuracy: %.4f", test_score)
+
+    y_pred = best.predict(X_test)
+    print(classification_report(y_test, y_pred, digits=3))
+
+    artifact_path = cfg["artifact"]["path"]
+    os.makedirs(os.path.dirname(artifact_path), exist_ok=True)
+    joblib.dump(best, artifact_path)
+    log.info("saved fitted pipeline to %s", artifact_path)
 
 
 if __name__ == "__main__":
