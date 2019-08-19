@@ -35,15 +35,27 @@ def health():
     return jsonify({"status": "ok"})
 
 
+@app.route("/features", methods=["GET"])
+def features():
+    """Tell the caller which keys the /predict endpoint expects."""
+    return jsonify({"features": FEATURES})
+
+
 @app.route("/predict", methods=["POST"])
 def predict():
     payload = request.get_json(force=True)
+    if not isinstance(payload, dict):
+        return jsonify({"error": "expected a JSON object"}), 400
     missing = [f for f in FEATURES if f not in payload]
     if missing:
         return jsonify({"error": "missing fields", "fields": missing}), 400
-    pipe = get_model()
-    label = predict_one(pipe, payload)
-    proba = predict_proba_one(pipe, payload)
+    try:
+        pipe = get_model()
+        label = predict_one(pipe, payload)
+        proba = predict_proba_one(pipe, payload)
+    except Exception as exc:
+        log.exception("prediction failed")
+        return jsonify({"error": str(exc)}), 500
     return jsonify({"good": label, "probability": proba})
 
 
