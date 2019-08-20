@@ -4,6 +4,7 @@ Usage:
     python -m src.train --config configs/default.yaml
 """
 import argparse
+import json
 import logging
 import os
 
@@ -74,6 +75,19 @@ def main(config_path):
     os.makedirs(os.path.dirname(artifact_path), exist_ok=True)
     joblib.dump(best, artifact_path)
     log.info("saved fitted pipeline to %s", artifact_path)
+
+    # Dump a small training summary alongside the model so we can sanity check
+    # later runs without re-loading the joblib.
+    summary = {
+        "best_score": float(grid.best_score_),
+        "best_params": {k: v for k, v in grid.best_params_.items()},
+        "test_accuracy": float(test_score),
+        "n_train": int(len(X_train)),
+        "n_test": int(len(X_test)),
+    }
+    summary_path = os.path.join(os.path.dirname(artifact_path), "summary.json")
+    with open(summary_path, "w") as f:
+        json.dump(summary, f, indent=2)
 
 
 if __name__ == "__main__":
