@@ -44,3 +44,43 @@ data/winequality-white.csv
 pip install -r requirements.txt
 python -m src.train --config configs/default.yaml
 ```
+
+## Results
+
+Trained on the combined red+white set, target = quality >= 7.
+
+```
+              precision    recall  f1-score   support
+
+           0      0.910     0.964     0.937      1108
+           1      0.706     0.498     0.584       192
+
+    accuracy                          0.895      1300
+   macro avg      0.808     0.731     0.760      1300
+weighted avg      0.880     0.895     0.884      1300
+```
+
+Best params from `GridSearchCV` (5 folds, F1):
+`rf__n_estimators=200, rf__max_depth=20, rf__min_samples_split=2`.
+
+The recall on the positive class is the weak spot, expected given that good
+wines are roughly 15% of the data. Could try class weights or SMOTE next.
+
+## Serving
+
+After `python -m src.train ...` the fitted pipeline lives at
+`models/pipeline.joblib`. Bring up the Flask app with:
+
+```
+export FLASK_APP=app.py
+flask run
+```
+
+Then POST a sample to `/predict`:
+
+```
+curl -X POST http://localhost:5000/predict -H 'Content-Type: application/json' \
+    -d '{"fixed acidity": 7.4, "volatile acidity": 0.7, ...}'
+```
+
+`GET /features` returns the exact list of expected keys.
