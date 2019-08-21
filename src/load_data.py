@@ -6,16 +6,22 @@ import pandas as pd
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data")
 
 
+def _read(path):
+    df = pd.read_csv(path, sep=";")
+    # The UCI csvs use spaces in column names ("fixed acidity" etc.). Normalise
+    # to lowercase here too in case anyone ever ships a copy without the typo.
+    df.columns = [c.strip() for c in df.columns]
+    return df
+
+
 def load_red():
     """Load the UCI red wine quality csv as a DataFrame."""
-    path = os.path.join(DATA_DIR, "winequality-red.csv")
-    return pd.read_csv(path, sep=";")
+    return _read(os.path.join(DATA_DIR, "winequality-red.csv"))
 
 
 def load_white():
     """Load the UCI white wine quality csv as a DataFrame."""
-    path = os.path.join(DATA_DIR, "winequality-white.csv")
-    return pd.read_csv(path, sep=";")
+    return _read(os.path.join(DATA_DIR, "winequality-white.csv"))
 
 
 def load_combined():
