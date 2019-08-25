@@ -21,8 +21,10 @@ def test_build_pipeline_has_two_steps():
 
 
 def test_pipeline_fits_and_predicts():
-    pipe = build_pipeline(n_estimators=20, random_state=0)
-    X, y = _toy_xy()
+    # Pin the seed at every level - the test was flaky once on CI when the
+    # rf happened to land below the 0.7 cutoff.
+    pipe = build_pipeline(n_estimators=50, random_state=0)
+    X, y = _toy_xy(n=300, seed=0)
     pipe.fit(X, y)
     preds = pipe.predict(X)
     assert preds.shape == y.shape
