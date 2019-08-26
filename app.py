@@ -43,12 +43,17 @@ def features():
 
 @app.route("/predict", methods=["POST"])
 def predict():
-    payload = request.get_json(force=True)
+    payload = request.get_json(force=True, silent=True)
     if not isinstance(payload, dict):
         return jsonify({"error": "expected a JSON object"}), 400
     missing = [f for f in FEATURES if f not in payload]
     if missing:
         return jsonify({"error": "missing fields", "fields": missing}), 400
+    # Reject non-numeric values up front, otherwise sklearn raises a less
+    # helpful error inside the scaler.
+    bad = [f for f in FEATURES if not isinstance(payload[f], (int, float))]
+    if bad:
+        return jsonify({"error": "non-numeric fields", "fields": bad}), 400
     try:
         pipe = get_model()
         label = predict_one(pipe, payload)
