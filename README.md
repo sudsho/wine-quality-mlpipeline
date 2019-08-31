@@ -84,3 +84,19 @@ curl -X POST http://localhost:5000/predict -H 'Content-Type: application/json' \
 ```
 
 `GET /features` returns the exact list of expected keys.
+
+## Deploy (Heroku)
+
+```
+heroku create
+git push heroku master
+heroku ps:scale web=1
+```
+
+`Procfile` runs gunicorn with two workers, `runtime.txt` pins
+Python 3.7.4. The model artifact is *not* checked in - run training inside the
+release phase or upload the joblib via a build hook.
+
+## License
+
+MIT. See `LICENSE`.
