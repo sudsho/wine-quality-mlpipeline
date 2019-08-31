@@ -1,5 +1,7 @@
 # wine-quality-mlpipeline
 
+[![Build Status](https://travis-ci.org/sudsho/wine-quality-mlpipeline.svg?branch=master)](https://travis-ci.org/sudsho/wine-quality-mlpipeline)
+
 Wine quality classifier built on the UCI Wine Quality dataset using a
 scikit-learn `Pipeline`. Predicts whether a wine is "good" (quality >= 7).
 
@@ -96,6 +98,14 @@ heroku ps:scale web=1
 `Procfile` runs gunicorn with two workers, `runtime.txt` pins
 Python 3.7.4. The model artifact is *not* checked in - run training inside the
 release phase or upload the joblib via a build hook.
+
+## Tests
+
+```
+pytest -v
+```
+
+CI runs against Python 3.6 and 3.7 on Travis (see `.travis.yml`).
 
 ## License
 
