@@ -26,6 +26,11 @@ def get_model():
     global _model
     if _model is None:
         log.info("loading model from %s", MODEL_PATH)
+        if not os.path.exists(MODEL_PATH):
+            raise RuntimeError(
+                "model artifact not found at %s. did the release phase "
+                "run training?" % MODEL_PATH
+            )
         _model = load_model(MODEL_PATH)
     return _model
 
