@@ -5,6 +5,46 @@
 Wine quality classifier built on the UCI Wine Quality dataset using a
 scikit-learn `Pipeline`. Predicts whether a wine is "good" (quality >= 7).
 
+## Quick start (runs offline)
+
+No network, no downloads. The CSVs under `data/` are bundled, so the smoke
+trains the pipeline and exercises the Flask predict path end to end:
+
+```
+python scripts/smoke.py     # or: make smoke
+```
+
+Real output:
+
+```
+[1/4] loading bundled data (offline)
+      loaded rows=6497 features=11 positives=1303
+[2/4] building pipeline + training
+      3-fold CV accuracy: mean=0.7953 std=0.0025
+      held-out test accuracy: 0.7977
+[3/4] persisting model + wiring Flask test client
+[4/4] POST /predict on a held sample
+      response: good=0 probability=0.1667 (true label=0)
+
+SMOKE OK: train + serve/predict path verified offline.
+```
+
+Run the unit tests the same way (also offline):
+
+```
+pytest -q
+```
+
+```
+13 passed in 2.50s
+```
+
+Verified with scikit-learn 1.8, pandas 2.3, numpy 2.4, Flask 3.1 on
+Python 3.11. The bundled CSVs carry the real UCI schema so the demo is
+self-contained. They are a synthetic stand-in for the full UCI download, so the
+accuracy here is baseline-level (the positive class is a ~20% minority); swap in
+the genuine UCI CSVs for the headline numbers in the Results section below.
+
 ## Dataset
 
 UCI Wine Quality (Cortez et al., 2009). Two CSVs:
